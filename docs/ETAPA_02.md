@@ -23,10 +23,14 @@ Suíte autônoma de autorização executa a migração real em PostgreSQL PGlite
 
 ## Limites e pendências
 
-Projeto remoto ProClub emjoizihrwffoqewapig encontrado saudável, sem tabelas public e sem migrações. Não foi aplicado SQL remoto; confirmar destinação exclusiva de desenvolvimento antes de vincular/aplicar. Não foram solicitadas nem inventadas credenciais.
+Projeto remoto ProClub emjoizihrwffoqewapig inicialmente vazio. Após confirmação explícita do usuário de uso exclusivo para desenvolvimento, as duas migrações foram aplicadas via MCP. Arquivos locais sincronizados com as versões registradas remotamente (20261016233110 e 20261016233308), sem modificar o SQL aplicado. Smoke SQL real aprovado, com rollback de todos os dados sintéticos e contagens finais zero em clubs/profiles/staff/auditoria. Não foram solicitadas nem inventadas credenciais.
 
-Sem Docker/psql disponíveis localmente, a stack completa Supabase e os advisors locais não foram executados. Testes de banco representam auth.uid/auth.users no bootstrap; não verificam JWT por HTTP, GoTrue ou PostgREST. Storage não configurado. Integração completa com Supabase Auth e autorização de operações Next.js é Etapa 03.
+Sem Docker/psql disponíveis localmente, a stack completa Supabase e os advisors locais não foram executados. Advisors remotos executados; políticas SELECT duplicadas foram consolidadas em segunda migração. Restam apenas avisos informativos de índices ainda não usados e RLS sem política no log privado (negação de acesso intencional). Veja [RLS sem política](https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy) e [índices sem uso](https://supabase.com/docs/guides/database/database-linter?lint=0005_unused_index). Testes de banco representam auth.uid/auth.users no bootstrap; não verificam JWT por HTTP, GoTrue ou PostgREST. Storage não configurado. Integração completa com Supabase Auth e autorização de operações Next.js é Etapa 03.
 
 `npm audit` reportou cinco entradas high na cadeia de ferramentas eslint-config-next → fast-glob/micromatch/braces (GHSA-vfj7-8cjw-p6xm). Não foi aplicado o downgrade incompatível de Next sugerido automaticamente; acompanhar correção upstream. Não se trata de dependência de execução da aplicação.
 
 PR da Etapa 02 deve ter base feat/etapa-01-fundacao enquanto PR #1 estiver aberto, para revisão exclusiva das mudanças de banco. Nenhum merge ou implantação autorizado/executado.
+
+Inspeção visual da home em 1440×1000 e 390×844 concluída: estrutura responsiva sem corte horizontal. Identificado contraste baixo no texto do CTA, pendência de interface sem impacto no isolamento de dados; identidade definitiva continua fora desta entrega.
+
+O primeiro CI desta branch detectou dependências opcionais em falta no lockfile Linux. Lockfile regenerado com npm 12 em diretório limpo para corrigir instalação reproduzível.

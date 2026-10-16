@@ -22,7 +22,7 @@ As rotas `/`, `/admin` e `/login` são estruturas públicas sem dados privados. 
 `src/app`: rotas e layouts; `src/modules`: domínios; `src/components`: UI compartilhada; `src/lib`: utilidades e infraestrutura; `supabase`: migrações e configuração local; `docs`: decisões e requisitos; `tests`: testes.
 
 ## Etapa 02
-As seis entidades fundamentais estão modeladas em migração versionada, com constraints, índices, grants por coluna, RLS e auditoria de privilégios. Veja [modelo e matriz de acesso](docs/DATABASE.md) e [execução local e migrações](supabase/README.md). Não foi aplicada migração remota.
+As seis entidades fundamentais estão modeladas em migração versionada, com constraints, índices, grants por coluna, RLS e auditoria de privilégios. Veja [modelo e matriz de acesso](docs/DATABASE.md) e [execução local e migrações](supabase/README.md). Migrações aplicadas e isolamento validado no Supabase de desenvolvimento confirmado pelo usuário; a aplicação ainda não se conecta ao banco.
 
 ## Próxima entrega
-Confirmar o ambiente Supabase de desenvolvimento, aplicar a migração revisada e implementar autenticação e autorização no servidor (Etapa 03). PR #1 da fundação permanece independente, sem merge automático.
+Implementar autenticação e autorização no servidor no ambiente Supabase de desenvolvimento (Etapa 03). PR #1 da fundação permanece independente, sem merge automático.
