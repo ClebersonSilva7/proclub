@@ -32,3 +32,26 @@ footer { border-top:1px solid var(--border); font-size:.875rem; }
 .auth-form button:disabled { cursor:wait; }
 .auth-links { padding:0; margin:0; display:flex; flex-direction:column; align-items:flex-start; gap:12px; }
 .form-message { background:var(--muted); padding:16px; border-radius:6px; overflow-wrap:anywhere; }
+
+.admin-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:24px; flex-wrap:wrap; }
+.admin-action { display:inline-flex; align-items:center; justify-content:center; min-height:48px; padding:10px 18px; border-radius:6px; background:var(--primary); color:white; font:inherit; font-weight:600; text-decoration:none; cursor:pointer; }
+.admin-filters { display:flex; flex-wrap:wrap; align-items:end; gap:16px; margin-block:32px; }
+.admin-filters .field { flex:1 1 200px; }
+.admin-filters > a { min-height:48px; display:inline-flex; align-items:center; }
+.field select,.field textarea { width:100%; min-height:48px; border:1px solid var(--border); border-radius:6px; padding:10px 12px; font:inherit; background:white; color:var(--foreground); }
+.field textarea { resize:vertical; }
+.admin-editor { max-width:720px; }
+.admin-editor h1 { margin-top:24px; overflow-wrap:anywhere; }
+.admin-form { display:grid; gap:24px; margin-block:24px 40px; }
+.admin-form fieldset { display:grid; gap:24px; padding:0; border:0; min-width:0; }
+.admin-form button { min-height:48px; justify-self:start; cursor:pointer; white-space:normal; }
+.admin-form fieldset:disabled { opacity:.7; }
+.club-list { list-style:none; padding:0; margin-block:0 32px; border-top:1px solid var(--border); }
+.club-list li { display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-block:20px; }
+.club-list a { display:inline-block; font-size:1.25rem; font-weight:650; padding-block:8px; overflow-wrap:anywhere; }
+.club-list div { min-width:0; }
+.club-list div span { display:block; overflow-wrap:anywhere; }
+.club-status { align-self:center; padding:4px 10px; background:var(--muted); border-radius:4px; }
+.staff-entry { border-block:1px solid var(--border); margin-top:-1px; }
+.staff-entry summary { padding:16px 4px; min-height:48px; cursor:pointer; overflow-wrap:anywhere; }
+@media(max-width:480px) { .admin-filters { align-items:stretch; } .admin-filters .field { flex-basis:100%; } .admin-form button { width:100%; } }

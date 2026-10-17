@@ -31,7 +31,7 @@ await exec(`
   create role authenticated nologin;
   create role service_role nologin bypassrls;
   create schema auth;
-  create table auth.users (id uuid primary key);
+  create table auth.users (id uuid primary key, email text unique, email_confirmed_at timestamptz default now(), is_anonymous boolean not null default false, deleted_at timestamptz, banned_until timestamptz);
   create function auth.uid() returns uuid language sql stable as
     $$ select nullif(current_setting('request.jwt.claim.sub', true),'')::uuid $$;
   grant usage on schema auth to anon,authenticated,service_role;
@@ -44,6 +44,7 @@ await exec(`
   set proclub.operator = 'synthetic-test-fixture';
   set proclub.reason = 'two-club isolation tests';
   insert into auth.users(id) values ${Array.from({length:9},(_,i)=>`('${u(i+1)}')`).join(',')};
+  update auth.users set email=id::text || '@synthetic.test';
   insert into public.profiles(id,display_name) select id,'Synthetic' from auth.users;
   insert into public.clubs(id,name,slug,city,state,status) values
     ('${blue}','Clube Azul','clube-azul','Campinas','SP','active'),
@@ -178,8 +179,63 @@ test('database authorization and isolation', async (t) => {
     await t.test('privileged functions have fixed search_path and no PUBLIC execute', async () => {
       await as('postgres');
       const functions = await rows(`select p.proname,p.proconfig,coalesce(array_to_string(p.proacl,','),'') as acl from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='private'`);
-      assert.equal(functions.length,5);
+      assert.ok(functions.length >= 5);
       for (const f of functions) { assert.ok(f.proconfig.includes('search_path=""')); assert.ok(!/(^|,)=X/.test(f.acl)); }
+    });
+
+    const createClubSQL = (slug='admin-club', reason='synthetic administrative test') => `select public.platform_save_club(null,'Clube administrativo','${slug}','volleyball','Campinas','SP','draft',null,'${reason}') as id`;
+    let newClub;
+    await t.test('nonadmins cannot invoke privileged RPCs, including direct private entry points', async () => {
+      for (const who of [fan,manager,staff,owner,revoked]) {
+        await as('authenticated',who);
+        await denied(createClubSQL());
+        await denied(`select public.platform_set_staff('${blue}','${fan}@synthetic.test','owner','active','synthetic escalation',null,null)`);
+        await denied(`select * from public.platform_club_staff('${red}')`);
+        await denied(`select private.require_platform_admin()`);
+      }
+      await as('anon'); await denied(createClubSQL());
+      await as('service_role'); await denied(createClubSQL());
+    });
+    await t.test('global admin creates a draft atomically with settings and verified-actor audit', async () => {
+      await as('authenticated',admin);
+      await exec(`set proclub.operator='forged-browser-actor'`);
+      newClub=(await rows(createClubSQL()))[0].id;
+      assert.equal(await count('public.club_settings',`club_id='${newClub}'`),1);
+      await denied(createClubSQL(),['23505']);
+      await denied(createClubSQL('another-admin-club','short'),['23514']);
+      await as('postgres');
+      const record=(await rows(`select operator,new_data->>'status' as status from private.permission_audit where entity='clubs' and new_data->>'id'='${newClub}'`))[0];
+      assert.equal(record.operator,admin);assert.equal(record.status,'draft');
+    });
+    const saveClub = async (status, expected) => {
+      const version=expected ?? (await rows(`select updated_at::text as v from public.clubs where id='${newClub}'`))[0].v;
+      return exec(`select public.platform_save_club('${newClub}','Clube administrativo','admin-club','volleyball','Campinas','SP','${status}','${version}','synthetic state transition')`);
+    };
+    await t.test('club activation requires owner; assignment uses existing confirmed account only', async () => {
+      await as('authenticated',admin);
+      await assert.rejects(saveClub('active'),e=>e.code==='23514');
+      await denied(`select public.platform_set_staff('${newClub}','missing@synthetic.test','owner','active','synthetic administrative test',null,null)`,['P0002']);
+      await exec(`select public.platform_set_staff('${newClub}','${fan}@synthetic.test','owner','active','synthetic administrative test',null,null)`);
+      await saveClub('active');
+      await denied(`select public.platform_set_staff('${newClub}','${fan}@synthetic.test','owner','revoked','synthetic administrative test','owner','active')`,['23514']);
+      await denied(`select public.platform_set_staff('${newClub}','${fan}@synthetic.test','manager','active','synthetic administrative test','owner','active')`,['23514']);
+      await exec(`select public.platform_set_staff('${newClub}','${manager}@synthetic.test','owner','active','synthetic administrative test',null,null)`);
+      await exec(`select public.platform_set_staff('${newClub}','${fan}@synthetic.test','owner','revoked','synthetic administrative test','owner','active')`);
+      assert.equal((await rows(`select * from public.platform_club_staff('${newClub}')`)).length,2);
+    });
+    await t.test('concurrent stale forms cannot overwrite club or staff decisions', async () => {
+      await as('authenticated',admin);
+      await assert.rejects(saveClub('suspended','2000-01-01T00:00:00Z'),e=>e.code==='40001');
+      await denied(`select public.platform_set_staff('${newClub}','${fan}@synthetic.test','manager','active','synthetic stale staff form','owner','active')`,['40001']);
+      const v=(await rows(`select updated_at::text as v from public.clubs where id='${newClub}'`))[0].v;
+      await denied(`select public.platform_save_club('${newClub}','Clube administrativo','changed-slug','volleyball','Campinas','SP','active','${v}','synthetic invalid slug edit')`,['23514']);
+    });
+    await t.test('suspension is reversible and archive is terminal and read-only', async () => {
+      await as('authenticated',admin); await saveClub('suspended'); await saveClub('active'); await saveClub('archived');
+      await assert.rejects(saveClub('active'),e=>e.code==='23514');
+      await assert.rejects(saveClub('archived'),e=>e.code==='23514');
+      await denied(`update public.clubs set name='Bypass archived RPC' where id='${newClub}'`,['23514']);
+      await denied(`select public.platform_set_staff('${newClub}','${fan}@synthetic.test','manager','active','synthetic archived club change','owner','revoked')`,['23514']);
     });
   } finally { if (url) await engine.end(); else await engine.close(); }
 });

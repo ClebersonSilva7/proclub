@@ -76,7 +76,7 @@ test.describe("Supabase development integration (synthetic fixtures only)", () =
     await login(page, process.env.E2E_ADMIN_EMAIL!);
     await page.goto("/admin");
     await expect(
-      page.getByRole("heading", { name: "Administração ProClub" }),
+      page.getByRole("heading", { name: "Clubes", exact: true }),
     ).toBeVisible();
     for (const slug of ["azul-stage3", "vermelho-stage3"]) {
       await page.goto(`/gestao/${slug}`);

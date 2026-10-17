@@ -15,7 +15,7 @@ Node.js 24 (arquivo .nvmrc) e npm. Execute `npm ci`, copie `.env.example` para `
 
 ## Entrega atual
 Etapa 01: Next.js App Router, TypeScript estrito, Tailwind, configuração shadcn/ui e botão base com Radix, estrutura modular, layout inicial em português, tratamento de erro/404/carregamento, endpoint de liveness e CI.
-As Etapas 01/02 fornecem a base técnica e de dados. A Etapa 03 adiciona formulários de autenticação e sessão Supabase SSR. `/admin`, `/fan` e `/gestao/[slug]` agora exigem autenticação e autorização no servidor. Não há funcionalidades comerciais ou ferramentas de painel implementadas.
+As Etapas 01/02 fornecem a base técnica e de dados. A Etapa 03 adiciona formulários de autenticação e sessão Supabase SSR. `/admin`, `/fan` e `/gestao/[slug]` agora exigem autenticação e autorização no servidor. A Etapa 04 implementa administração global de clubes e vínculos auditados. Não há módulos financeiros nem painel operacional do clube.
 `/api/health` indica que o processo HTTP responde; não verifica banco nem serviços externos.
 
 ## Estrutura
@@ -27,5 +27,8 @@ As seis entidades fundamentais estão modeladas em migração versionada, com co
 ## Etapa 03
 Login, cadastro, recuperação e troca de senha, callback PKCE, sessão por cookies HttpOnly e rotas protegidas. Veja [configuração e limites](docs/AUTHENTICATION.md) e [registro da entrega](docs/ETAPA_03.md). Entrega dos e-mails depende das configurações de Auth/SMTP e de verificação com destinatário autorizado.
 
+## Etapa 04
+Administração global de clubes e vínculos auditados em `/admin`. Escopo, validação e limites em [docs/ETAPA_04.md](docs/ETAPA_04.md). Testes automatizados incluem dados sintéticos e callback PKCE real, sem equivaler à entrega do e-mail.
+
 ## Próxima entrega
-Concluir validação dos links de e-mail e seguir para administração ProClub (Etapa 04). PRs anteriores permanecem independentes, sem merge automático.
+Etapa 05: painel operacional e identidade do clube. Recuperação pelo percurso de e-mail continua pendência operacional do SMTP padrão antes de liberação real. PRs permanecem sem merge automático.

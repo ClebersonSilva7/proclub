@@ -34,3 +34,7 @@ O primeiro pedido assistido de recuperação foi aceito (mail.send e /recover 20
 Corrigido o handler para distinguir limite de envio e falha do provedor, sem revelar existência de conta. Cookies PKCE da recuperação agora são gravados somente depois de o provedor aceitar a solicitação. Um teste com o SDK real e transporte HTTP sintético comprova que um reenvio 429 preserva o verificador correspondente ao desafio do primeiro pedido. Callback diferencia verificador ausente/incompatível de erro genérico de link. Não foram desabilitados limites ou confirmação de e-mail, nem emitidos novos pedidos em sequência para contornar a restrição.
 
 O percurso assistido continua pendente de novo envio aceito dentro do limite ou de configuração de SMTP personalizado. Não declarar recuperação por e-mail concluída com base apenas no cadastro confirmado ou no teste de troca de senha autenticada.
+
+## Revalidação na Etapa 04
+
+CI Quality #10 de 062d00e confirmado aprovado. Jornadas de login, sessão, troca de senha sintética, logout e permissões reexecutadas automaticamente. Acrescentado teste opt-in de callback PKCE contra Auth real com código sintético de recuperação: valida vínculo com navegador original, abertura da página de nova senha e consumo único. A fixture não envia e-mail e não modifica a conta real do usuário. A pendência do percurso de entrega/abertura do e-mail continua explícita; não exige teste manual para validar as operações independentes de administração em desenvolvimento.
