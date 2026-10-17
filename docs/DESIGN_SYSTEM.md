@@ -2,7 +2,7 @@
 
 A Etapa 01 não define a identidade visual final. Layout estrutural simples, português do Brasil, tokens CSS semânticos, foco visível e navegação por teclado. Botão reutilizável baseado em Radix/CVA e configuração shadcn/ui. Identidade, tipografia de marca e painéis completos serão definidos na etapa visual correspondente.
 
-## Sistema preservado na autenticação
+## Sistema preservado na autenticação e administração
 
 Valores observados em `src/app/globals.css`; registrar esta base não aprova uma identidade final:
 
@@ -28,3 +28,15 @@ Durante o envio, o formulário recebe `aria-busy`, o botão mostra “Aguarde…
 ## Escopo e validação visual
 
 Esta é uma extensão funcional da base existente, sem mudança de identidade. A revisão visual inspecionou oito capturas desktop/mobile em `.impeccable/review` para login, cadastro, recuperação e erro e não indicou correção visual. As capturas não cobrem o estado transitório de envio, foco por teclado ou todos os fluxos de autenticação. O comportamento declarado acima foi extraído do código; não implica que esses estados foram capturados ou que e-mails reais foram entregues.
+
+## Administração global — Etapa 04
+
+Extensão funcional em modo **Operate**, sem nova identidade, fonte ou paleta. Referências: `src/app/admin`, `src/modules/platform/forms.tsx` e `src/app/globals.css`. A listagem ocupa a estrutura global; cadastro e detalhe usam uma coluna de edição com largura máxima de 720px. O título administrativo conserva a escala global `clamp(2rem, 5vw, 3.5rem)`, entrelinha de 1,15 e quebra de nomes longos. Os formulários mantêm ritmo vertical de 24px e grupos de campo de 8px.
+
+Busca e seleção de situação se organizam em linha com quebra e intervalo de 16px. Abaixo de 480px, cada filtro ocupa uma linha e os botões dos formulários preenchem a largura disponível. Inputs, selects, áreas de texto, ações principais e resumos expansíveis da equipe têm altura mínima de 48px. Selects e áreas de texto compartilham fundo branco, borda semântica, cantos de 6px e preenchimento de 10px por 12px; áreas de texto podem ser redimensionadas verticalmente.
+
+A lista usa divisórias, nomes de clube em 1,25rem com peso 650 e situação escrita em etiqueta de fundo suave, com cantos de 4px. A situação não depende somente de cor. Os vínculos da equipe usam seções expansíveis nativas com e-mail, papel e situação no resumo. Textos longos quebram dentro da coluna. Nenhuma sombra ou decoração adicional foi introduzida.
+
+Orientações visíveis explicam rascunho, slug permanente, responsável necessário para ativação, arquivamento definitivo e conta com e-mail confirmado sem envio de convite. O motivo da alteração tem rótulo e orientação de 10 a 500 caracteres. As mensagens reutilizam o fundo suave e os papéis de alerta ou confirmação. Clubes arquivados mostram aviso de consulta, campos de metadados desabilitados com opacidade reduzida e nenhum formulário de alteração de equipe. Essa apresentação acompanha proteções próprias do servidor e do banco; o estado visual desabilitado não constitui autorização.
+
+Foram inspecionadas as seis capturas `.impeccable/review/{desktop,mobile}-admin-{lista,novo,detalhe}.png`, de lista filtrada, cadastro e detalhe com equipe expandida. Elas confirmam a continuidade visual nas larguras de 1440px e 390px, sem defeito visual identificado nesta revisão. Não cobrem foco, envio, todos os erros ou o estado arquivado, descritos a partir do código. Tampouco comprovam permissões ou entrega SMTP. As 26 jornadas Playwright, 28 verificações unitárias e 24 cenários SQL registrados para a etapa são validações funcionais separadas, não resultados obtidos das imagens. Escopo e pendências em `docs/ETAPA_04.md`.

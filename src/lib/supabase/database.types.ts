@@ -238,9 +238,44 @@ export type Database = {
     Views: {
       [_ in never]: never;
     };
+    // Generated from development; nullable SQL arguments corrected manually.
     Functions: {
-      [_ in never]: never;
-    };
+      platform_club_staff: {
+        Args: { p_club_id: string }
+        Returns: {
+          email: string
+          role: string
+          status: string
+          user_id: string
+        }[]
+      }
+      platform_save_club: {
+        Args: {
+          p_city: string
+          p_club_id: string | null
+          p_expected_updated_at: string | null
+          p_name: string
+          p_primary_sport: string
+          p_reason: string
+          p_slug: string
+          p_state: string
+          p_status: string
+        }
+        Returns: string
+      }
+      platform_set_staff: {
+        Args: {
+          p_club_id: string
+          p_email: string
+          p_expected_role: string | null
+          p_expected_status: string | null
+          p_reason: string
+          p_role: string
+          p_status: string
+        }
+        Returns: string
+      }
+    }
     Enums: {
       [_ in never]: never;
     };
