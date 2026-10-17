@@ -10,7 +10,8 @@ main { min-height:65vh; padding-top:72px; padding-bottom:72px; }
 h1 { font-size:clamp(2rem,5vw,3.5rem); line-height:1.15; letter-spacing:-.025em; max-width:22ch; font-weight:700; margin:0 0 24px; text-wrap:balance; }
 p { max-width:70ch; margin:0 0 24px; }
 h2 { font-size:1.5rem; font-weight:650; margin:40px 0 12px; }
-a { color:inherit; text-underline-offset:4px; }
+@layer base { a { color:inherit; } }
+a { text-underline-offset:4px; }
 a:hover { text-decoration-thickness:2px; }
 footer { border-top:1px solid var(--border); font-size:.875rem; }
 :focus-visible { outline:2px solid var(--primary); outline-offset:4px; }
@@ -19,3 +20,15 @@ footer { border-top:1px solid var(--border); font-size:.875rem; }
 .skip:focus { top:12px; }
 @media(max-width:480px) { header { align-items:flex-start; flex-direction:column; gap:12px; } main { padding-top:40px; } }
 @media(prefers-reduced-motion:reduce) { * { transition:none!important; } }
+
+.auth-shell { max-width:480px; margin-inline:auto; }
+.auth-shell h1 { font-size:clamp(2rem,4vw,2.75rem); }
+.auth-form { display:grid; gap:24px; margin-block:32px; }
+.field { display:grid; gap:8px; }
+.field label { font-weight:650; }
+.field input { width:100%; min-height:48px; border:1px solid var(--border); border-radius:6px; padding:10px 12px; font:inherit; background:white; color:var(--foreground); caret-color:var(--primary); }
+.field small { font-size:.875rem; line-height:1.5; }
+.auth-form button { min-height:48px; cursor:pointer; }
+.auth-form button:disabled { cursor:wait; }
+.auth-links { padding:0; margin:0; display:flex; flex-direction:column; align-items:flex-start; gap:12px; }
+.form-message { background:var(--muted); padding:16px; border-radius:6px; overflow-wrap:anywhere; }
