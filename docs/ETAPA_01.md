@@ -10,3 +10,6 @@ PRD e arquitetura em docs são sínteses do contexto recebido. Importar os docum
 
 ## Próxima etapa
 Conectar projeto Supabase de desenvolvimento e especificar as seis entidades fundamentais com constraints, RLS, grants e testes de isolamento. Autenticação virá na sequência.
+
+## Verificação posterior
+Na revisão das Etapas 02/03, CI e jornadas desktop/mobile foram confirmados aprovados. A inspeção visual foi concluída; o contraste do CTA foi corrigido na Etapa 03. O texto acima registra o estado original da entrega.

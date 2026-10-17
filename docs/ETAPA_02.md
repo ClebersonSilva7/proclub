@@ -19,7 +19,7 @@ Suíte autônoma de autorização executa a migração real em PostgreSQL PGlite
 - Build padrão com Turbopack: bloqueado pelo ambiente local ao abrir porta para processamento CSS (EPERM), inclusive após tentativa fora do sandbox.
 - Build alternativo `next build --webpack`: aprovado. O script de build padrão e o CI continuam usando Turbopack.
 - Playwright desktop/mobile: quatro jornadas aprovadas localmente após instalação do Chromium.
-- Aguardar resultado do CI desta branch para confirmação do PostgreSQL nativo e build padrão.
+- CI Quality #6 confirmado aprovado no commit 122413b: PostgreSQL 17 nativo, PGlite, build padrão e jornadas desktop/mobile.
 
 ## Limites e pendências
 
@@ -31,6 +31,6 @@ Sem Docker/psql disponíveis localmente, a stack completa Supabase e os advisors
 
 PR da Etapa 02 deve ter base feat/etapa-01-fundacao enquanto PR #1 estiver aberto, para revisão exclusiva das mudanças de banco. Nenhum merge ou implantação autorizado/executado.
 
-Inspeção visual da home em 1440×1000 e 390×844 concluída: estrutura responsiva sem corte horizontal. Identificado contraste baixo no texto do CTA, pendência de interface sem impacto no isolamento de dados; identidade definitiva continua fora desta entrega.
+Inspeção visual da home em 1440×1000 e 390×844 concluída: estrutura responsiva sem corte horizontal. Identificado contraste baixo no texto do CTA, corrigido posteriormente na Etapa 03; identidade definitiva continua fora desta entrega.
 
 O primeiro CI desta branch detectou dependências opcionais em falta no lockfile Linux. Lockfile regenerado com npm 12 em diretório limpo para corrigir instalação reproduzível.

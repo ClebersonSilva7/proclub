@@ -4,6 +4,10 @@ permissions:
   contents: read
 jobs:
   check:
+    env:
+      APP_URL: http://127.0.0.1:3000
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci_synthetic
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

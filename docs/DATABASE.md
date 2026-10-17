@@ -1,6 +1,6 @@
 # Banco de dados — Etapa 02
 
-A migração em `supabase/migrations` implementa seis entidades. Os nomes e estados abaixo são decisões desta entrega; PRD.md e ARCHITECTURE.md continuam sendo sínteses. Não há login ou chamadas ao banco na aplicação ainda.
+A migração em `supabase/migrations` implementa seis entidades. Os nomes e estados abaixo são decisões desta entrega; PRD.md e ARCHITECTURE.md continuam sendo sínteses. A Etapa 03 adiciona login e consultas autenticadas da aplicação; as regras de banco abaixo permanecem vigentes.
 
 ## Campos, relações e exclusão
 
