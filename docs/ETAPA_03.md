@@ -24,3 +24,13 @@ Inspeção visual dos quatro estados (login, cadastro, recuperação e erro), em
 - Etapas 04/05 implementam ferramentas de gestão e convites; esta etapa protege entradas de painel, não implementa esses módulos.
 
 Branch feat/etapa-03-autenticacao, baseada na Etapa 02. Sem merge ou implantação em produção.
+
+## Verificação assistida e correção da recuperação
+
+O usuário confirmou o recebimento do e-mail de cadastro; a conta também foi conferida como confirmada no Supabase. Os dados sintéticos foram mantidos por solicitação explícita do usuário.
+
+O primeiro pedido assistido de recuperação foi aceito (mail.send e /recover 200). Reenvios subsequentes foram recusados com /recover 429 e over_email_send_rate_limit. O usuário relatou mensagem de link inválido/expirado. Ainda não foi comprovada a troca de senha pelo percurso de e-mail.
+
+Corrigido o handler para distinguir limite de envio e falha do provedor, sem revelar existência de conta. Cookies PKCE da recuperação agora são gravados somente depois de o provedor aceitar a solicitação. Um teste com o SDK real e transporte HTTP sintético comprova que um reenvio 429 preserva o verificador correspondente ao desafio do primeiro pedido. Callback diferencia verificador ausente/incompatível de erro genérico de link. Não foram desabilitados limites ou confirmação de e-mail, nem emitidos novos pedidos em sequência para contornar a restrição.
+
+O percurso assistido continua pendente de novo envio aceito dentro do limite ou de configuração de SMTP personalizado. Não declarar recuperação por e-mail concluída com base apenas no cadastro confirmado ou no teste de troca de senha autenticada.

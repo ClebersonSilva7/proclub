@@ -14,11 +14,15 @@ const messages: Record<string, string> = {
     "Se o cadastro puder ser concluído, você receberá um link para confirmar seu e-mail. Depois, entre com sua senha.",
   "recovery-sent":
     "Se houver uma conta com esse e-mail, você receberá um link para recuperar o acesso.",
+  "recovery-failed":
+    "Não foi possível solicitar a recuperação agora. Tente novamente mais tarde.",
   "password-updated":
     "Sua senha foi atualizada. Entre novamente para continuar.",
   password: "Use de 12 a 72 caracteres e digite a mesma senha nos dois campos.",
   "password-failed":
     "Não foi possível atualizar a senha. Solicite um novo link e tente novamente.",
+  "link-browser":
+    "Não foi possível validar este link neste navegador. Abra-o no navegador onde pediu a recuperação. Se fez outro pedido depois, aguarde o limite de envio e solicite um novo link.",
   "link-invalid":
     "Este link é inválido ou expirou. Solicite um novo link e abra no mesmo navegador.",
   "rate-limit":

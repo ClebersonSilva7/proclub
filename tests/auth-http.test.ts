@@ -11,11 +11,16 @@ const { client } = vi.hoisted(() => ({
       exchangeCodeForSession: vi.fn(),
     },
     from: vi.fn(),
+    commitCookies: vi.fn(),
   },
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("../src/lib/supabase/server", () => ({
   createClient: async () => client,
+  createRecoveryClient: async () => ({
+    supabase: client,
+    commitCookies: client.commitCookies,
+  }),
 }));
 import { POST } from "../src/app/auth/[action]/route";
 import { GET } from "../src/app/auth/callback/route";
@@ -169,4 +174,44 @@ it("callback rejects missing/invalid code and exchanges PKCE code before own pro
       )
     ).headers.get("location"),
   ).toBe("http://127.0.0.1:3000/fan");
+});
+
+it("recovery reports rate limits without committing replacement PKCE cookies", async () => {
+  client.auth.resetPasswordForEmail.mockResolvedValue({
+    error: { status: 429 },
+  });
+  expect(
+    (await call("recover", { email: "fan@example.test" })).headers.get(
+      "location",
+    ),
+  ).toContain("status=rate-limit");
+  expect(client.commitCookies).not.toHaveBeenCalled();
+});
+it("recovery reports provider outage instead of claiming a successful request", async () => {
+  client.auth.resetPasswordForEmail.mockResolvedValue({
+    error: { status: 503 },
+  });
+  expect(
+    (await call("recover", { email: "fan@example.test" })).headers.get(
+      "location",
+    ),
+  ).toContain("status=recovery-failed");
+  expect(client.commitCookies).not.toHaveBeenCalled();
+});
+it("recovery saves PKCE cookies only after the provider accepts", async () => {
+  await call("recover", { email: "fan@example.test" });
+  expect(client.commitCookies).toHaveBeenCalledOnce();
+});
+
+it("callback distinguishes a missing browser verifier from an expired link", async () => {
+  client.auth.exchangeCodeForSession.mockResolvedValue({
+    error: { code: "pkce_code_verifier_not_found" },
+  });
+  expect(
+    (
+      await GET(
+        new Request("http://127.0.0.1:3000/auth/callback?code=synthetic"),
+      )
+    ).headers.get("location"),
+  ).toContain("status=link-browser");
 });

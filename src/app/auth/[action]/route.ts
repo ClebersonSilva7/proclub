@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createRecoveryClient } from "@/lib/supabase/server";
 import { appOrigin, supabaseConfig } from "@/lib/supabase/config";
 import {
   authRedirect,
@@ -61,20 +61,27 @@ export async function POST(
     return fail("invalid");
   if (action === "password" && !passwordUpdateSchema.safeParse(input).success)
     return fail("password");
-  const supabase = await createClient();
   try {
+    if (action === "recover") {
+      const { supabase: recoveryClient, commitCookies } =
+        await createRecoveryClient();
+      const { error } = await recoveryClient.auth.resetPasswordForEmail(
+        emailSchema.parse(input.email),
+        { redirectTo: `${appOrigin()}/auth/callback?next=/redefinir-senha` },
+      );
+      if (error?.status === 429) return fail("rate-limit");
+      // Keep account existence private; Supabase normally returns success for
+      // unknown addresses, but never expose a provider's not-found response.
+      if (error?.status === 404) return fail("recovery-sent");
+      if (error) return fail("recovery-failed");
+      commitCookies();
+      return fail("recovery-sent");
+    }
+    const supabase = await createClient();
     if (action === "logout") {
       const { error } = await supabase.auth.signOut({ scope: "global" });
       if (error) return fail("unavailable");
       return authRedirect("/login?status=signed-out");
-    }
-    if (action === "recover") {
-      // Same response for existing/nonexistent accounts; Supabase enforces rate limits.
-      await supabase.auth.resetPasswordForEmail(
-        emailSchema.parse(input.email),
-        { redirectTo: `${appOrigin()}/auth/callback?next=/redefinir-senha` },
-      );
-      return fail("recovery-sent");
     }
     if (action === "password") {
       const {

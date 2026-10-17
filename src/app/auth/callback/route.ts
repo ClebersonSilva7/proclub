@@ -10,7 +10,13 @@ export async function GET(request: Request) {
     return authRedirect("/login?status=link-invalid");
   const supabase = await createClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
-  if (error) return authRedirect("/login?status=link-invalid");
+  if (error)
+    return authRedirect(
+      error.code === "pkce_code_verifier_not_found" ||
+        error.code === "bad_code_verifier"
+        ? "/login?status=link-browser"
+        : "/login?status=link-invalid",
+    );
   const {
     data: { user },
     error: userError,

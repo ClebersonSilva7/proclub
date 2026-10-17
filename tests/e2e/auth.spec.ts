@@ -55,3 +55,11 @@ test("invalid callbacks do not open protected content or external destinations",
     "inválido ou expirou",
   );
 });
+
+test('recovery feedback distinguishes send limit and browser validation failure', async ({ page }) => {
+  await page.goto('/recuperar-senha?status=rate-limit');
+  await expect(page.locator('.form-message[role=alert]')).toContainText('Muitas tentativas');
+  await expect(page.getByText('Se houver uma conta com esse e-mail')).toHaveCount(0);
+  await page.goto('/login?status=link-browser');
+  await expect(page.locator('.form-message[role=alert]')).toContainText('navegador onde pediu a recuperação');
+});
