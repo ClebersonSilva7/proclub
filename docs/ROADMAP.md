@@ -3,8 +3,8 @@
 2. Banco multi-tenant e RLS.
 3. Autenticação e permissões.
 4. Super Admin: clubes e vínculos auditados.
-5. Painel e identidade do clube (entrega atual).
-6. Site público.
+5. Painel e identidade do clube.
+6. Site público (entrega atual).
 7. Torcedores e Fan ID.
 8. Planos.
 9. Checkout e pagamentos.

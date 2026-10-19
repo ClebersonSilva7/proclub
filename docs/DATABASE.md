@@ -64,3 +64,7 @@ Integração com Supabase Auth/PostgREST, Storage e autorização de rotas/açõ
 ## Evolução das Etapas 04/05
 
 A matriz acima registra a fundação da Etapa 02. A Etapa 04 acrescentou RPCs auditadas de administração global (clubes e vínculos, sem promoção de platform_admins), proteção do último responsável e arquivamento definitivo. A Etapa 05 acrescenta RPCs SECURITY INVOKER de identidade/imagens, Storage privado por clube, versão de formulário e bloqueio de configurações arquivadas. Campos de metadados/configurações ativos continuam públicos; conteúdos do bucket permanecem privados nesta etapa, mesmo que seus caminhos constem da configuração. Regras, grants, testes e limites atuais: ETAPA_04.md e ETAPA_05.md.
+
+## Evolução da Etapa 06
+
+Bucket permanece privado. SELECT público no Storage é restrito à imagem atualmente referenciada por um clube ativo, sem ampliar leitura de versões antigas ou escrita anônima. Campos e tabelas privados permanecem protegidos. Regras e teste integrado em ETAPA_06.md.

@@ -8,6 +8,7 @@ export default function Home() {
         O ProClub está em desenvolvimento. Estamos preparando a plataforma para
         receber os clubes, suas comunidades e programas de associação.
       </p>
+      <p><Link href="/clubes">Conhecer os clubes</Link></p>
       <Button asChild>
         <Link href="/login">Acessar minha conta</Link>
       </Button>

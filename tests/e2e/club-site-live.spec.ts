@@ -1,0 +1,44 @@
+import {expect,test} from '@playwright/test';
+import {createClient} from '@supabase/supabase-js';
+import {randomUUID} from 'node:crypto';
+import {syntheticClubImage} from '../fixtures/club-image.mjs';
+test.describe('Public club site development integration',()=>{
+ test.skip(!process.env.E2E_PASSWORD,'Requires synthetic development accounts');
+ test.setTimeout(90000);
+ test('anonymous site shows only active public data and current images; removal and suspension revoke access',async({page,request},info)=>{
+  process.loadEnvFile('.env.local');
+  const url=process.env.NEXT_PUBLIC_SUPABASE_URL!,key=process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;expect(url).toBe('https://emjoizihrwffoqewapig.supabase.co');
+  const config={auth:{persistSession:false,autoRefreshToken:false}};
+  const admin=createClient(url,key,config),anon=createClient(url,key,config);
+  expect((await admin.auth.signInWithPassword({email:process.env.E2E_ADMIN_EMAIL!,password:process.env.E2E_PASSWORD!})).error).toBeNull();
+  const slug=`public-${info.project.name}-${Date.now()}`,name=`Clube público sintético ${info.project.name} ${Date.now().toString().slice(-6)}`;
+  const saved=await admin.rpc('platform_save_club',{p_club_id:null,p_name:name,p_slug:slug,p_primary_sport:'volleyball',p_city:'Campinas',p_state:'SP',p_status:'draft',p_expected_updated_at:null,p_reason:'Teste sintético do site público'});expect(saved.error).toBeNull();const id=saved.data!;
+  const changeState=async(status:string)=>{
+   const c=await admin.from('clubs').select('*').eq('id',id).single();expect(c.error).toBeNull();
+   const r=await admin.rpc('platform_save_club',{p_club_id:id,p_name:name,p_slug:slug,p_primary_sport:'volleyball',p_city:'Campinas',p_state:'SP',p_status:status,p_expected_updated_at:c.data!.updated_at,p_reason:'Transição sintética para teste de visibilidade'});expect(r.error).toBeNull();
+  };
+  await page.goto(`/clubes/${slug}`);await expect(page.getByRole('heading',{name:'Clube não encontrado'})).toBeVisible();
+  expect((await admin.rpc('platform_set_staff',{p_club_id:id,p_email:process.env.E2E_MANAGER_EMAIL!,p_role:'owner',p_status:'active',p_reason:'Responsável sintético do site público',p_expected_role:null,p_expected_status:null})).error).toBeNull();
+  await changeState('active');
+  const versions=async()=>{const c=await admin.from('clubs').select('updated_at').eq('id',id).single();const s=await admin.from('club_settings').select('updated_at').eq('club_id',id).single();return {club:c.data!.updated_at,settings:s.data!.updated_at};};
+  const v=await versions();expect((await admin.rpc('club_save_identity',{p_club_id:id,p_expected_club:v.club,p_expected_settings:v.settings,p_values:{name,primary_sport:'volleyball',city:'Campinas',state:'SP',description:'Apresentação sintética pública. <script>window.clubInjection=true</script>',primary_color:'#F6E100',secondary_color:'#123456',public_email:'publico@clube.example',public_phone:'+55 (11) 99999-0000',website_url:'https://example.test/clube',instagram_url:'',facebook_url:''}})).error).toBeNull();
+  const png=syntheticClubImage(),path=(kind:string)=>`${id}/${kind}/${randomUUID()}.png`;
+  const logo=path('logo'),cover=path('cover'),unattached=path('logo');
+  for(const file of [logo,cover,unattached])expect((await admin.storage.from('club-assets').upload(file,png,{contentType:'image/png'})).error).toBeNull();
+  for(const [kind,file] of [['logo',logo],['cover',cover]])expect((await admin.rpc('club_set_image',{p_club_id:id,p_kind:kind,p_path:file,p_expected_settings:(await versions()).settings})).error).toBeNull();
+  await page.goto(`/clubes/${slug}`);await expect(page.getByRole('heading',{name,exact:true})).toBeVisible();await expect(page.getByText('publico@clube.example',{exact:true})).toBeVisible();await expect(page.locator('#sobre')).toContainText('<script>');expect(await page.evaluate(()=>Object.hasOwn(window,'clubInjection'))).toBe(false);
+  await expect(page.getByRole('link',{name:'Site oficial',exact:false})).toHaveAttribute('href','https://example.test/clube');
+  await expect.poll(()=>page.locator('img').evaluateAll((images:HTMLImageElement[])=>images.length===2&&images.every(i=>i.complete&&i.naturalWidth>0))).toBe(true);
+  expect((await anon.storage.from('club-assets').download(logo)).error).toBeNull();expect((await anon.storage.from('club-assets').createSignedUrl(logo,3600)).error).not.toBeNull();expect((await anon.storage.from('club-assets').list(id+'/logo')).data).toEqual([]);expect((await anon.storage.from('club-assets').download(unattached)).error).not.toBeNull();
+  const image=await request.get(`/clubes/${slug}/imagens/logo`);expect(image.status()).toBe(200);expect(image.headers()['cache-control']).toContain('no-store');
+  const fake=await request.get(`/clubes/${slug}/imagens/logo?path=${encodeURIComponent(unattached)}`);expect(fake.status()).toBe(200);expect(Buffer.from(await fake.body()).equals(png)).toBe(true);
+  const replacement=path('logo');expect((await admin.storage.from('club-assets').upload(replacement,png,{contentType:'image/png'})).error).toBeNull();expect((await admin.rpc('club_set_image',{p_club_id:id,p_kind:'logo',p_path:replacement,p_expected_settings:(await versions()).settings})).error).toBeNull();
+  expect((await anon.storage.from('club-assets').download(logo)).error).not.toBeNull();expect((await anon.storage.from('club-assets').download(replacement)).error).toBeNull();
+  expect((await admin.rpc('club_set_image',{p_club_id:id,p_kind:'logo',p_path:null,p_expected_settings:(await versions()).settings})).error).toBeNull();expect((await request.get(`/clubes/${slug}/imagens/logo`)).status()).toBe(404);
+  await page.goto(`/clubes?q=${slug}`);await expect(page.getByRole('link',{name,exact:true})).toHaveCount(0);
+  await page.goto(`/clubes?q=${encodeURIComponent(name)}`);await expect(page.getByRole('link',{name,exact:true})).toBeVisible();
+  await changeState('suspended');await page.goto(`/clubes/${slug}`);await expect(page.getByRole('heading',{name:'Clube não encontrado'})).toBeVisible();expect((await request.get(`/clubes/${slug}/imagens/cover`)).status()).toBe(404);expect((await anon.storage.from('club-assets').download(cover)).error).not.toBeNull();
+  await changeState('active');expect((await request.get(`/clubes/${slug}/imagens/cover`)).status()).toBe(200);
+  await changeState('archived');await page.goto(`/clubes/${slug}`);await expect(page.getByRole('heading',{name:'Clube não encontrado'})).toBeVisible();expect((await request.get(`/clubes/${slug}/imagens/cover`)).status()).toBe(404);
+ });
+});

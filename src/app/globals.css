@@ -72,3 +72,24 @@ footer { border-top:1px solid var(--border); font-size:.875rem; }
 .club-image-section button { min-height:48px; cursor:pointer; }
 .field input[type=file] { font-size:.9rem; padding:10px; }
 @media(max-width:480px) { .club-colors { grid-template-columns:1fr; } }
+
+.public-back { display:inline-flex; min-height:48px; align-items:center; margin-bottom:20px; }
+.public-club-heading { background:var(--club-primary); color:var(--club-primary-ink); display:flex; align-items:center; gap:28px; padding:40px; border-bottom:8px solid var(--club-secondary); }
+.public-club-heading h1 { max-width:24ch; margin-bottom:16px; overflow-wrap:anywhere; }
+.public-club-heading p { margin-bottom:12px; }
+.public-club-heading nav { gap:20px; }
+.public-club-heading a { min-height:48px; display:inline-flex; align-items:center; color:inherit; }
+.public-club-logo { width:120px; height:120px; flex:none; object-fit:contain; background:white; padding:8px; border-radius:6px; }
+.public-club-cover { width:100%; height:clamp(180px,28vw,360px); object-fit:cover; background:var(--muted); }
+.public-club-content { max-width:760px; }
+.club-description { white-space:pre-wrap; overflow-wrap:anywhere; }
+.public-contact-list { list-style:none; margin:0; padding:0; }
+.public-contact-list li { border-bottom:1px solid var(--border); padding-block:12px; overflow-wrap:anywhere; }
+.public-contact-list li > span:first-child { display:block; font-size:.875rem; }
+.public-contact-list a { display:inline-flex; min-height:48px; align-items:center; max-width:100%; overflow-wrap:anywhere; word-break:break-word; }
+.public-empty { margin-block:40px; }
+.public-directory li { padding-block:12px; }
+@media(max-width:600px) { .public-club-heading { padding:24px; flex-direction:column; align-items:flex-start; gap:20px; } .public-club-logo { width:96px; height:96px; } }
+
+.public-club-heading a:focus-visible { outline-color:var(--club-primary-ink); }
+.public-club-heading nav a,.public-back,.public-contact-list a,.public-directory a { text-decoration:underline; text-underline-offset:4px; }

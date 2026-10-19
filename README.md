@@ -33,5 +33,8 @@ Administração global de clubes e vínculos auditados em `/admin`. Escopo, vali
 ## Etapa 05
 Painel do clube para dados públicos, contatos, cores, logo e capa, com Storage privado e autorização por clube. [Escopo e validação](docs/ETAPA_05.md).
 
+## Etapa 06
+Diretório em `/clubes` e site em `/clubes/[slug]`, com apresentação, identidade e contatos públicos de clubes ativos. Somente imagens atuais são públicas; versões antigas permanecem privadas. [Escopo e validação](docs/ETAPA_06.md).
+
 ## Próxima entrega
-Etapa 06: site público personalizado do clube. Recuperação pelo percurso de e-mail continua pendência operacional do SMTP padrão antes de liberação real. PRs permanecem sem merge automático.
+Etapa 07: torcedores e Fan ID. Recuperação pelo percurso de e-mail continua pendência operacional do SMTP padrão antes de liberação real. PRs permanecem sem merge automático.

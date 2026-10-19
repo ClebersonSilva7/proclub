@@ -27,3 +27,9 @@ Pagamentos, convites e gestão de administradores globais pela interface ainda n
 ## Gestão da identidade — Etapa 05
 
 Extensão Operate da interface existente em /gestao/[slug]: edição de dados públicos, descrição, contatos, links HTTPS, paleta e upload privado de logo/capa. Preserva sistema e navegação da plataforma. Owner/manager ativo de clube ativo ou administrador global autorizado; arquivados não editáveis. Salvamento atômico com detecção de versão antiga. Acesso a imagens protegido, sem publicação anônima nesta etapa. Site público é a Etapa 06; os testes usam dados sintéticos, sem representar identidade aprovada de um clube real. Ver docs/ETAPA_05.md.
+
+## Site público — Etapa 06
+
+Diretório /clubes e página /clubes/[slug] apresentam somente clubes ativos, seus dados, identidade e contatos públicos. O cliente público não usa a sessão do visitante. Imagens atuais passam por RLS; versões antigas seguem privadas. Sem módulos comerciais ou vínculo de torcedor anunciado como disponível. A base visual da plataforma é preservada; marca/cor de cada clube vêm dos dados configurados e o texto do cabeçalho recebe contraste calculado. Direção específica em docs/surfaces/club-site.md; detalhes e limites em docs/ETAPA_06.md.
+
+A revisão visual independente inspecionou seis capturas em `.impeccable/review/{desktop,mobile}-{site,site-vazio,diretorio}.png`, sem correção visual material indicada. Elas mostram página completa, estado mínimo e diretório com dados sintéticos, sem representar marca aprovada de clube real. Capturas não comprovam autorização, publicação ou persistência; essas verificações têm evidências funcionais próprias em `docs/ETAPA_06.md`.

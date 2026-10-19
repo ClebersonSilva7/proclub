@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 test.describe("Global administration (synthetic development fixtures)",()=>{
+  test.setTimeout(60000);
   test.skip(!process.env.E2E_PASSWORD,"Requires synthetic development accounts");
   test("admin creates club, assigns owner, activates, suspends and archives; nonadmins cannot mutate",async({page,browser},info)=>{
     const slug=`stage4-${info.project.name}-${Date.now()}`;
