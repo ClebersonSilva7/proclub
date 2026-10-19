@@ -12,7 +12,7 @@ A extensão preserva a base visual provisória existente: fonte sans-serif do si
 
 A administração também tem modo **Operate**, preservando o sistema visual existente. `/admin` oferece listagem de clubes com busca, filtro por situação e paginação; `/admin/clubes/novo` cria clubes em rascunho; o detalhe permite editar metadados e situação, mantendo o slug permanente. A equipe administrativa usa contas existentes com e-mail confirmado, nos papéis responsável (`owner`), gestor (`manager`) e equipe (`staff`), com alteração e revogação de vínculos. Toda operação exige motivo para auditoria.
 
-As proteções são verificadas no servidor e no banco. Ativar exige responsável ativo; o último responsável de um clube ativo é protegido; arquivamento é definitivo nesta entrega e mantém dados e vínculos para consulta. A interface não cria administradores globais nem envia convites. A entrada protegida de gestão do clube permanece sem painel operacional, previsto para a Etapa 05. Escopo técnico, transições e limites estão em `docs/ETAPA_04.md`.
+As proteções são verificadas no servidor e no banco. Ativar exige responsável ativo; o último responsável de um clube ativo é protegido; arquivamento é definitivo nesta entrega e mantém dados e vínculos para consulta. A interface não cria administradores globais nem envia convites. A Etapa 05 acrescenta o painel de identidade descrito abaixo. Escopo técnico, transições e limites estão em `docs/ETAPA_04.md`.
 
 ## Evidências e limites
 
@@ -22,4 +22,8 @@ A revisão visual desta entrega inspecionou oito capturas desktop/mobile de logi
 
 A revisão da Etapa 04 inspecionou seis capturas de lista, novo clube e detalhe/equipe, em desktop (1440px) e celular (390px), em `.impeccable/review`. As capturas mostram continuidade visual e organização vertical no celular; não comprovam permissões, isolamento ou entrega SMTP. A validação funcional desta etapa registrou 26 jornadas Playwright públicas e remotas de desenvolvimento com dados sintéticos, 28 testes unitários e 24 cenários SQL; esses resultados são evidências próprias, separadas da inspeção visual.
 
-Pagamentos, convites, gestão de administradores globais pela interface e painel operacional do clube ainda não estão implementados. A administração da Etapa 04 não equivale a uma liberação em produção. A recuperação por e-mail continua pendente do limite do SMTP padrão, conforme `docs/ETAPA_04.md`. As demais áreas protegidas de acesso não devem ser apresentadas como painéis completos. Não inserir dados privados em rotas públicas nem anunciar recursos planejados como disponíveis.
+Pagamentos, convites e gestão de administradores globais pela interface ainda não estão implementados. A administração da Etapa 04 não equivale a uma liberação em produção. A recuperação por e-mail continua pendente do limite do SMTP padrão, conforme `docs/ETAPA_04.md`. As demais áreas protegidas de acesso não devem ser apresentadas como painéis completos. Não inserir dados privados em rotas públicas nem anunciar recursos planejados como disponíveis.
+
+## Gestão da identidade — Etapa 05
+
+Extensão Operate da interface existente em /gestao/[slug]: edição de dados públicos, descrição, contatos, links HTTPS, paleta e upload privado de logo/capa. Preserva sistema e navegação da plataforma. Owner/manager ativo de clube ativo ou administrador global autorizado; arquivados não editáveis. Salvamento atômico com detecção de versão antiga. Acesso a imagens protegido, sem publicação anônima nesta etapa. Site público é a Etapa 06; os testes usam dados sintéticos, sem representar identidade aprovada de um clube real. Ver docs/ETAPA_05.md.

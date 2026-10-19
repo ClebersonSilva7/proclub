@@ -2,8 +2,8 @@
 1. Fundação técnica.
 2. Banco multi-tenant e RLS.
 3. Autenticação e permissões.
-4. Super Admin (entrega atual: clubes e vínculos auditados).
-5. Painel e identidade do clube.
+4. Super Admin: clubes e vínculos auditados.
+5. Painel e identidade do clube (entrega atual).
 6. Site público.
 7. Torcedores e Fan ID.
 8. Planos.

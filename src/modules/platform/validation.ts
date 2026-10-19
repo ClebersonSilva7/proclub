@@ -9,7 +9,7 @@ const reason = z.string().trim().min(10).max(500);
 export const clubSchema = z.object({
   id: uuidOrNull, name: z.string().trim().min(2).max(120),
   slug: z.string().min(2).max(80).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
-  primary_sport: z.string().trim().min(2).max(60), city: z.string().trim().min(2).max(100),
+  primary_sport: z.string().trim().min(2).max(60), city: z.string().trim().min(2).max(120),
   state: z.enum(states), status: z.enum(["draft","active","suspended","archived"]),
   updated_at: emptyNull.pipe(z.iso.datetime({ offset: true }).nullable()), reason,
 }).refine(v => v.id ? v.updated_at !== null : v.status === "draft" && v.updated_at === null);
