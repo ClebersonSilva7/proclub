@@ -1,5 +1,5 @@
 import {beforeEach,expect,it,vi} from "vitest";
-const {client,query,download}=vi.hoisted(()=>({client:vi.fn(),download:vi.fn(),query:{select:vi.fn(),eq:vi.fn(),maybeSingle:vi.fn()}}));
+const {client,query,download}=vi.hoisted(()=>({client:vi.fn(),download:vi.fn(),query:{retry:vi.fn(),select:vi.fn(),eq:vi.fn(),maybeSingle:vi.fn()}}));
 vi.mock('server-only',()=>({}));
 vi.mock('../src/lib/supabase/public',()=>({createPublicClient:client}));
 import {getPublicClub} from '../src/modules/club-site/data';
@@ -8,7 +8,7 @@ import {contrastInk,safeColor,safeExternalLink,phoneLink,validClubSlug} from '..
 const id='88888888-0000-4000-8000-000000000101';
 const club={id,name:'Clube Azul',slug:'azul',city:'Campinas',state:'SP',primary_sport:'volleyball'};
 const settings={description:'Clube sintético',logo_path:`${id}/logo/synthetic.png`,cover_path:null};
-beforeEach(()=>{vi.resetAllMocks();client.mockReturnValue({from:()=>query,storage:{from:()=>({download})}});query.select.mockReturnValue(query);query.eq.mockReturnValue(query);query.maybeSingle.mockResolvedValueOnce({data:club,error:null}).mockResolvedValueOnce({data:settings,error:null});download.mockResolvedValue({data:new Blob([new Uint8Array([137,80,78,71,13,10,26,10])]),error:null});});
+beforeEach(()=>{vi.resetAllMocks();client.mockReturnValue({from:()=>query,storage:{from:()=>({download})}});query.retry.mockReturnValue(query);query.select.mockReturnValue(query);query.eq.mockReturnValue(query);query.maybeSingle.mockResolvedValueOnce({data:club,error:null}).mockResolvedValueOnce({data:settings,error:null});download.mockResolvedValue({data:new Blob([new Uint8Array([137,80,78,71,13,10,26,10])]),error:null});});
 it('validates slugs and omits unsafe external links and CSS values',()=>{
  for(const slug of ['../admin','AZUL','a','%2fadmin'])expect(validClubSlug(slug)).toBe(false);
  expect(validClubSlug('clube-azul')).toBe(true);

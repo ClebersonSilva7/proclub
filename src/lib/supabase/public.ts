@@ -8,6 +8,6 @@ export function createPublicClient() {
   if(!config) return null;
   return createClient<Database>(config.url,config.key,{
     auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false},
-    global:{fetch:(input,init)=>fetch(input,{...init,cache:"no-store"})},
+    global:{fetch:(input,init)=>fetch(input,{...init,cache:"no-store",signal: init?.signal ? AbortSignal.any([init.signal,AbortSignal.timeout(3000)]) : AbortSignal.timeout(3000)})},
   });
 }
