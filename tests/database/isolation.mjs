@@ -19,6 +19,7 @@ const blue = u(101), red = u(102), draft = u(103);
 const manager = u(1), redManager = u(2), fan = u(3), redFan = u(4), staff = u(5), owner = u(6), admin = u(7), revoked = u(8), multi = u(9);
 const as = async (role, id = '') => {
   await exec('reset role');
+  await exec(`set storage.operation='object.get_authenticated'`);
   await query(`select set_config('request.jwt.claim.sub', $1, false)`, [id]);
   await exec(`set role ${role}`);
 };
@@ -34,6 +35,8 @@ await exec(`
   create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
   create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text references storage.buckets(id),name text,unique(bucket_id,name));
   alter table storage.objects enable row level security;
+  create function storage.allow_any_operation(expected text[]) returns boolean language sql stable as
+    $$ select current_setting('storage.operation',true)=any(expected) $$;
   grant usage on schema storage to anon,authenticated,service_role;
   grant select,insert,update,delete on storage.objects to authenticated;
   grant select on storage.objects to anon;
@@ -223,6 +226,28 @@ test('database authorization and isolation', async (t) => {
       await denied(`select public.club_set_image('${blue}','logo','${blue}/logo/${u(599)}.png','${await version()}')`,['23514']);
       await exec(`select public.club_set_image('${blue}','logo',null,'${await version()}')`);
       assert.equal((await rows(`select logo_path from public.club_settings where club_id='${blue}'`))[0].logo_path,null);
+    });
+    await t.test('public assets expose only current referenced images of active clubs', async () => {
+      const current=`${blue}/logo/${u(701)}.png`, old=`${blue}/logo/${u(702)}.png`, replacement=`${blue}/logo/${u(703)}.png`;
+      await as('authenticated',manager);
+      for(const name of [current,old,replacement]) await exec(`insert into storage.objects(bucket_id,name) values ('club-assets','${name}')`);
+      const version=async()=>(await rows(`select updated_at::text as v from public.club_settings where club_id='${blue}'`))[0].v;
+      await exec(`select public.club_set_image('${blue}','logo','${current}','${await version()}')`);
+      await as('anon');assert.equal(await count('storage.objects'),1);
+      await exec(`set storage.operation='object.sign'`);assert.equal(await count('storage.objects'),0);
+      await exec(`set storage.operation='object.list'`);assert.equal(await count('storage.objects'),0);
+      await exec(`set storage.operation='object.get_authenticated'`);assert.equal(await count('storage.objects',`name='${current}'`),1);assert.equal(await count('storage.objects',`name='${old}'`),0);
+      await denied(`insert into storage.objects(bucket_id,name) values ('club-assets','${blue}/logo/${u(704)}.png')`);
+      await as('authenticated',redManager);assert.equal(await count('storage.objects',`name='${current}'`),1);assert.equal(await count('storage.objects',`name='${old}'`),0);
+      assert.equal((await rows(`update storage.objects set name='tampered' where name='${current}' returning id`)).length,0);
+      await as('authenticated',manager);await exec(`select public.club_set_image('${blue}','logo','${replacement}','${await version()}')`);
+      await as('anon');assert.equal(await count('storage.objects',`name='${current}'`),0);assert.equal(await count('storage.objects',`name='${replacement}'`),1);
+      await as('postgres');await exec(`update public.clubs set status='suspended' where id='${blue}'`);
+      await as('anon');assert.equal(await count('storage.objects'),0);assert.equal(await count('public.clubs',`id='${blue}'`),0);
+      await as('postgres');await exec(`update public.clubs set status='active' where id='${blue}'`);
+      await as('anon');assert.equal(await count('storage.objects',`name='${replacement}'`),1);
+      await as('authenticated',manager);await exec(`select public.club_set_image('${blue}','logo',null,'${await version()}')`);
+      await as('anon');assert.equal(await count('storage.objects'),0);
     });
     const createClubSQL = (slug='admin-club', reason='synthetic administrative test') => `select public.platform_save_club(null,'Clube administrativo','${slug}','volleyball','Campinas','SP','draft',null,'${reason}') as id`;
     let newClub;
