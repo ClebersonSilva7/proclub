@@ -240,6 +240,24 @@ export type Database = {
     };
     // Generated from development; nullable SQL arguments corrected manually.
     Functions: {
+      club_save_identity: {
+        Args: {
+          p_club_id: string
+          p_expected_club: string
+          p_expected_settings: string
+          p_values: Json
+        }
+        Returns: undefined
+      }
+      club_set_image: {
+        Args: {
+          p_club_id: string
+          p_expected_settings: string
+          p_kind: string
+          p_path: string | null
+        }
+        Returns: undefined
+      }
       platform_club_staff: {
         Args: { p_club_id: string }
         Returns: {

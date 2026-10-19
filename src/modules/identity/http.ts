@@ -12,7 +12,7 @@ export function validOrigin(request: Request) {
   return request.headers.get("origin") === appOrigin();
 }
 
-export async function readAuthForm(request: Request) {
+export async function readAuthForm(request: Request, maxBytes = 8192) {
   const reader = request.body?.getReader();
   if (!reader) return new FormData();
   let size = 0;
@@ -21,7 +21,7 @@ export async function readAuthForm(request: Request) {
     const { done, value } = await reader.read();
     if (done) break;
     size += value.byteLength;
-    if (size > 8192) {
+    if (size > maxBytes) {
       await reader.cancel();
       throw new Error("Form too large");
     }

@@ -60,3 +60,7 @@ Utilize o mesmo contexto ao inserir/alterar/remover club_staff. Nunca envie cred
 A mesma suíte roda no CI em PostgreSQL 17.11 nativo e descartável, via PROCLUB_TEST_DATABASE_URL. Há dois clubes ativos Azul/Vermelho, um rascunho auxiliar, gestores separados, gestor multi-clube, owner, staff, gestor revogado, torcedores e admin global. Testa acesso cruzado nos dois sentidos, escrita legítima, escalada, metadata forjada, mudança de IDs, privilégios de service_role, suspensão, auditoria e constraints. Banco nativo precisa estar vazio, com nome proclub_test; nunca apontar esse runner para projeto Supabase ou banco com dados.
 
 Integração com Supabase Auth/PostgREST, Storage e autorização de rotas/ações do Next.js pertence às etapas seguintes. Não há buckets ou políticas Storage; os caminhos são apenas referências validadas.
+
+## Evolução das Etapas 04/05
+
+A matriz acima registra a fundação da Etapa 02. A Etapa 04 acrescentou RPCs auditadas de administração global (clubes e vínculos, sem promoção de platform_admins), proteção do último responsável e arquivamento definitivo. A Etapa 05 acrescenta RPCs SECURITY INVOKER de identidade/imagens, Storage privado por clube, versão de formulário e bloqueio de configurações arquivadas. Campos de metadados/configurações ativos continuam públicos; conteúdos do bucket permanecem privados nesta etapa, mesmo que seus caminhos constem da configuração. Regras, grants, testes e limites atuais: ETAPA_04.md e ETAPA_05.md.

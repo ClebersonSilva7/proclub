@@ -37,7 +37,7 @@ it("assigns club staff without offering platform-admin roles",async()=>{
   expect(rpc).toHaveBeenCalledWith("platform_set_staff",expect.objectContaining({p_expected_role:null,p_expected_status:null,p_role:"manager"}));
 });
 it("maps database rules, duplicates and concurrency without leaking database messages",async()=>{
-  for(const [code,status] of [["40001","stale"],["23505","duplicate"],["23514","rule"],["P0002","missing"],["XX000","failed"]]) {
+  for(const [code,status] of [["PT409","stale"],["40001","stale"],["23505","duplicate"],["23514","rule"],["P0002","missing"],["XX000","failed"]]) {
     rpc.mockResolvedValue({data:null,error:{code,message:"private database detail"}});
     const r=await post("salvar",club);expect(r.headers.get("location")).toContain(`status=${status}`);expect(await r.text()).not.toContain("private database detail");
   }

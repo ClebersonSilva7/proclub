@@ -19,6 +19,7 @@ test.describe("Global administration (synthetic development fixtures)",()=>{
     await expect(page.getByText("Alterações salvas.",{exact:true})).toBeVisible();
     const detail=page.url().split('?')[0];const id=detail.split('/').at(-1)!;
     const clubForm=page.locator('form[action$="/salvar"]');
+    const outdatedClub=await clubForm.evaluate((el:HTMLFormElement)=>Object.fromEntries(new FormData(el))) as Record<string,string>;
     await clubForm.getByLabel("Situação do clube",{exact:true}).selectOption("active");
     await clubForm.getByLabel("Motivo da alteração",{exact:true}).fill("Tentativa sintética de ativar sem responsável");
     await clubForm.getByRole("button",{name:"Salvar clube",exact:true}).click();
@@ -33,6 +34,8 @@ test.describe("Global administration (synthetic development fixtures)",()=>{
     await clubForm.getByLabel("Motivo da alteração",{exact:true}).fill("Ativação sintética com responsável cadastrado");
     await clubForm.getByRole("button",{name:"Salvar clube",exact:true}).click();
     await expect(page.getByText("Alterações salvas.",{exact:true})).toBeVisible();
+    const staleClub=await page.request.post('/admin/clubes/acoes/salvar',{headers:{Origin:'http://127.0.0.1:3000'},form:{...outdatedClub,reason:'Teste sintético de versão antiga do clube'},maxRedirects:0});expect(staleClub.headers().location).toContain('status=stale');
+    const staleStaff=await page.request.post('/admin/clubes/acoes/equipe',{headers:{Origin:'http://127.0.0.1:3000'},form:{id,email:process.env.E2E_MANAGER_EMAIL!,role:'owner',status:'active',expected_role:'manager',expected_status:'active',reason:'Teste sintético de versão antiga do vínculo'},maxRedirects:0});expect(staleStaff.headers().location).toContain('status=stale');
     const manager=await browser.newContext({baseURL:"http://127.0.0.1:3000"});
     try {
       const mp=await manager.newPage();await mp.goto("/login");

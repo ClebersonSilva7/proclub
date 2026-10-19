@@ -23,7 +23,7 @@ export async function adminPost(request: Request, action: string) {
     result = await supabase.rpc("platform_set_staff", { p_club_id: v.id, p_email: v.email, p_role: v.role, p_status: v.status, p_reason: v.reason, p_expected_role: v.expected_role, p_expected_status: v.expected_status });
   } else return new Response(null, { status: 404 });
   if (result.error) {
-    const codes: Record<string,string> = { '40001': 'stale', '23505': 'duplicate', '23514': 'rule', 'P0002': 'missing' };
+    const codes: Record<string,string> = { '40001': 'stale', 'PT409': 'stale', '23505': 'duplicate', '23514': 'rule', 'P0002': 'missing' };
     if (result.error.code === '42501') return new Response(null, { status: 403 });
     return authRedirect(`${back}?status=${codes[result.error.code] ?? 'failed'}`);
   }

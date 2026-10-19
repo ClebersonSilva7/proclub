@@ -30,6 +30,13 @@ await exec(`
   create role anon nologin;
   create role authenticated nologin;
   create role service_role nologin bypassrls;
+  create schema storage;
+  create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+  create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text references storage.buckets(id),name text,unique(bucket_id,name));
+  alter table storage.objects enable row level security;
+  grant usage on schema storage to anon,authenticated,service_role;
+  grant select,insert,update,delete on storage.objects to authenticated;
+  grant select on storage.objects to anon;
   create schema auth;
   create table auth.users (id uuid primary key, email text unique, email_confirmed_at timestamptz default now(), is_anonymous boolean not null default false, deleted_at timestamptz, banned_until timestamptz);
   create function auth.uid() returns uuid language sql stable as
@@ -183,6 +190,40 @@ test('database authorization and isolation', async (t) => {
       for (const f of functions) { assert.ok(f.proconfig.includes('search_path=""')); assert.ok(!/(^|,)=X/.test(f.acl)); }
     });
 
+    await t.test('club identity is atomic, versioned and isolated from other clubs', async () => {
+      await as('authenticated',manager);
+      const version=(await rows(`select c.updated_at::text as c,s.updated_at::text as s from public.clubs c join public.club_settings s on s.club_id=c.id where c.id='${blue}'`))[0];
+      const values=JSON.stringify({name:'Clube Azul',primary_sport:'volleyball',city:'Campinas',state:'SP',description:'Identity test',primary_color:'#123456',secondary_color:'#ffffff',public_email:'',public_phone:'',website_url:'https://example.test',instagram_url:'',facebook_url:''});
+      await exec(`select public.club_save_identity('${blue}','${version.c}','${version.s}','${values}')`);
+      assert.equal((await rows(`select description from public.club_settings where club_id='${blue}'`))[0].description,'Identity test');
+      await denied(`select public.club_save_identity('${blue}','${version.c}','${version.s}','${values}')`,['PT409']);
+      await denied(`select public.club_save_identity('${red}',now(),now(),'${values}')`);
+      const latest=(await rows(`select c.updated_at::text as c,s.updated_at::text as s from public.clubs c join public.club_settings s on s.club_id=c.id where c.id='${blue}'`))[0];
+      const invalid=values.replace('Identity test','Should rollback').replace('#123456','invalid');
+      await denied(`select public.club_save_identity('${blue}','${latest.c}','${latest.s}','${invalid}')`,['23514']);
+      assert.equal((await rows(`select description from public.club_settings where club_id='${blue}'`))[0].description,'Identity test');
+    });
+    await t.test('private asset policies isolate uploads and deny overwrite, movement and common users', async () => {
+      const asset=`${blue}/logo/${u(501)}.png`, other=`${red}/logo/${u(502)}.png`;
+      await as('authenticated',manager);
+      await exec(`insert into storage.objects(bucket_id,name) values ('club-assets','${asset}')`);
+      await denied(`insert into storage.objects(bucket_id,name) values ('club-assets','${other}')`);
+      for(const path of [`${blue}/../escape.png`,`${blue}/logo/file.svg`,'invalid/logo/file.png']) await denied(`insert into storage.objects(bucket_id,name) values ('club-assets','${path}')`);
+      assert.equal((await rows(`update storage.objects set name='${other}' where name='${asset}' returning id`)).length,0);
+      assert.equal((await rows(`delete from storage.objects where name='${asset}' returning id`)).length,0);
+      for(const who of [fan,staff,revoked,redManager]) {await as('authenticated',who);assert.equal(await count('storage.objects'),0);await denied(`select public.club_save_identity('${blue}',now(),now(),'{}')`);await denied(`select public.club_set_image('${blue}','logo',null,now())`);await denied(`insert into storage.objects(bucket_id,name) values ('club-assets','${blue}/cover/${u(503)}.png')`);}
+      await as('anon');assert.equal(await count('storage.objects'),0);
+    });
+    await t.test('image reference requires existing object of same club and kind', async () => {
+      await as('authenticated',manager);
+      const version=async()=>(await rows(`select updated_at::text as v from public.club_settings where club_id='${blue}'`))[0].v;
+      const asset=`${blue}/logo/${u(501)}.png`;
+      await exec(`select public.club_set_image('${blue}','logo','${asset}','${await version()}')`);
+      await denied(`select public.club_set_image('${blue}','cover','${asset}','${await version()}')`,['23514']);
+      await denied(`select public.club_set_image('${blue}','logo','${blue}/logo/${u(599)}.png','${await version()}')`,['23514']);
+      await exec(`select public.club_set_image('${blue}','logo',null,'${await version()}')`);
+      assert.equal((await rows(`select logo_path from public.club_settings where club_id='${blue}'`))[0].logo_path,null);
+    });
     const createClubSQL = (slug='admin-club', reason='synthetic administrative test') => `select public.platform_save_club(null,'Clube administrativo','${slug}','volleyball','Campinas','SP','draft',null,'${reason}') as id`;
     let newClub;
     await t.test('nonadmins cannot invoke privileged RPCs, including direct private entry points', async () => {
@@ -225,8 +266,8 @@ test('database authorization and isolation', async (t) => {
     });
     await t.test('concurrent stale forms cannot overwrite club or staff decisions', async () => {
       await as('authenticated',admin);
-      await assert.rejects(saveClub('suspended','2000-01-01T00:00:00Z'),e=>e.code==='40001');
-      await denied(`select public.platform_set_staff('${newClub}','${fan}@synthetic.test','manager','active','synthetic stale staff form','owner','active')`,['40001']);
+      await assert.rejects(saveClub('suspended','2000-01-01T00:00:00Z'),e=>e.code==='PT409');
+      await denied(`select public.platform_set_staff('${newClub}','${fan}@synthetic.test','manager','active','synthetic stale staff form','owner','active')`,['PT409']);
       const v=(await rows(`select updated_at::text as v from public.clubs where id='${newClub}'`))[0].v;
       await denied(`select public.platform_save_club('${newClub}','Clube administrativo','changed-slug','volleyball','Campinas','SP','active','${v}','synthetic invalid slug edit')`,['23514']);
     });
@@ -234,6 +275,8 @@ test('database authorization and isolation', async (t) => {
       await as('authenticated',admin); await saveClub('suspended'); await saveClub('active'); await saveClub('archived');
       await assert.rejects(saveClub('active'),e=>e.code==='23514');
       await assert.rejects(saveClub('archived'),e=>e.code==='23514');
+      await denied(`update public.club_settings set description='archived bypass' where club_id='${newClub}'`);
+      await denied(`insert into storage.objects(bucket_id,name) values ('club-assets','${newClub}/logo/${u(600)}.png')`);
       await denied(`update public.clubs set name='Bypass archived RPC' where id='${newClub}'`,['23514']);
       await denied(`select public.platform_set_staff('${newClub}','${fan}@synthetic.test','manager','active','synthetic archived club change','owner','revoked')`,['23514']);
     });

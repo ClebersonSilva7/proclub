@@ -15,7 +15,7 @@ Node.js 24 (arquivo .nvmrc) e npm. Execute `npm ci`, copie `.env.example` para `
 
 ## Entrega atual
 Etapa 01: Next.js App Router, TypeScript estrito, Tailwind, configuração shadcn/ui e botão base com Radix, estrutura modular, layout inicial em português, tratamento de erro/404/carregamento, endpoint de liveness e CI.
-As Etapas 01/02 fornecem a base técnica e de dados. A Etapa 03 adiciona formulários de autenticação e sessão Supabase SSR. `/admin`, `/fan` e `/gestao/[slug]` agora exigem autenticação e autorização no servidor. A Etapa 04 implementa administração global de clubes e vínculos auditados. Não há módulos financeiros nem painel operacional do clube.
+As Etapas 01/02 fornecem a base técnica e de dados. A Etapa 03 adiciona formulários de autenticação e sessão Supabase SSR. `/admin`, `/fan` e `/gestao/[slug]` agora exigem autenticação e autorização no servidor. A Etapa 04 implementa administração global de clubes e vínculos auditados. A Etapa 05 acrescenta a gestão da identidade do clube. Não há módulos financeiros.
 `/api/health` indica que o processo HTTP responde; não verifica banco nem serviços externos.
 
 ## Estrutura
@@ -30,5 +30,8 @@ Login, cadastro, recuperação e troca de senha, callback PKCE, sessão por cook
 ## Etapa 04
 Administração global de clubes e vínculos auditados em `/admin`. Escopo, validação e limites em [docs/ETAPA_04.md](docs/ETAPA_04.md). Testes automatizados incluem dados sintéticos e callback PKCE real, sem equivaler à entrega do e-mail.
 
+## Etapa 05
+Painel do clube para dados públicos, contatos, cores, logo e capa, com Storage privado e autorização por clube. [Escopo e validação](docs/ETAPA_05.md).
+
 ## Próxima entrega
-Etapa 05: painel operacional e identidade do clube. Recuperação pelo percurso de e-mail continua pendência operacional do SMTP padrão antes de liberação real. PRs permanecem sem merge automático.
+Etapa 06: site público personalizado do clube. Recuperação pelo percurso de e-mail continua pendência operacional do SMTP padrão antes de liberação real. PRs permanecem sem merge automático.
